@@ -260,5 +260,6 @@ export default function WhaleAlertsClient({ initialAlerts }: WhaleAlertsClientPr
                     </div>
                 )}
             </div>
-            );
+        </div>
+    );
 }
