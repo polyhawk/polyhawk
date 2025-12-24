@@ -47,21 +47,32 @@ export default function WhaleAlertsWidget({ initialAlerts }: WhaleAlertsWidgetPr
         loadAlerts();
     }, []);
 
-    // 2. Poll for new alerts every 15 seconds from backend
+    // 2. Poll every 15 seconds: fetch fresh alerts and store in backend
     useEffect(() => {
         const poll = async () => {
             try {
-                // Fetch from backend storage
+                // Fetch fresh alerts from Polymarket
+                const freshResponse = await fetch('/api/whale-alerts', { cache: 'no-store' });
+                if (freshResponse.ok) {
+                    const freshAlerts = await freshResponse.json();
+                    // Store them in backend
+                    if (freshAlerts && freshAlerts.length > 0) {
+                        await fetch('/api/whale-alerts-store', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(freshAlerts)
+                        }).catch(() => { }); // Silent fail if storage fails
+                    }
+                }
+
+                // Then fetch from backend storage to get all accumulated alerts
                 const response = await fetch('/api/whale-alerts-store?limit=100', { cache: 'no-store' });
                 if (!response.ok) return;
                 const data = await response.json();
                 const newAlerts: WhaleAlert[] = data.alerts || [];
 
                 setAlerts(prev => {
-                    const existingIds = new Set(prev.map(a => a.id));
-                    const uniqueNew = newAlerts.filter(a => !existingIds.has(a.id));
-
-                    const combined = [...newAlerts, ...prev]
+                    const combined = [...newAlerts]
                         .sort((a, b) => b.timestamp - a.timestamp)
                         .slice(0, 1000);
 
