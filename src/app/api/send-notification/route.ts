@@ -1,7 +1,4 @@
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -41,7 +38,7 @@ export async function POST(request: Request) {
 
 async function sendEmailNotification(email: string, alert: any, test?: boolean) {
     if (!process.env.RESEND_API_KEY) {
-        return NextResponse.json({ error: 'Email service not configured' }, { status: 503 });
+        return NextResponse.json({ error: 'Email service not configured. Please add RESEND_API_KEY to environment variables.' }, { status: 503 });
     }
 
     const subject = test
@@ -98,6 +95,9 @@ async function sendEmailNotification(email: string, alert: any, test?: boolean) 
     `;
 
     try {
+        const { Resend } = await import('resend');
+        const resend = new Resend(process.env.RESEND_API_KEY);
+
         await resend.emails.send({
             from: 'PolyHawk Alerts <alerts@polyhawk.fun>',
             to: email,
