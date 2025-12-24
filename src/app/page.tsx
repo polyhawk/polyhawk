@@ -86,11 +86,11 @@ export default async function Home() {
           lineHeight: 1.6,
           fontSize: 'clamp(1rem, 4vw, 1.25rem)'
         }}>
-          Aggregating prediction markets and deeper on-chain insights. Track whales, analyze trends, and master the markets.
+          Advanced prediction market insights for smarter trading | Portfolio & whale tracking | wallet analytics, news, and learn
         </p>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <a href={POLYMARKET_REFERRAL} target="_blank" className="btn btn-primary" style={{ fontSize: '1rem', padding: '0.8rem 1.5rem', flex: '1 1 auto', maxWidth: '300px' }}>
-            Trade on Polymarket
+            Polymarket
           </a>
         </div>
       </div>
@@ -202,29 +202,28 @@ export default async function Home() {
         </div>
       </div>
 
-      {/* Top Gainers Section */}
+      {/* Featured Market Table (Formerly Top Gainers) */}
       <div style={{ marginBottom: '4rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>🚀 Top Gainers</h2>
-          <span style={{ fontSize: '0.9rem', padding: '2px 8px', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', borderRadius: '4px', fontWeight: 600 }}>24h</span>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>🚀 Trending Opportunities</h2>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
           {topGainers.map(market => (
-            <Link href={`/market/${market.id}`} key={market.id} style={{ textDecoration: 'none' }}>
+            <a href={market.url} target="_blank" key={market.id} style={{ textDecoration: 'none' }}>
               <div className="card-hover" style={{
                 background: 'var(--surface)',
                 border: '1px solid var(--border)',
                 borderRadius: '16px',
                 padding: '1.5rem',
+                height: '100%'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                     <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--primary)' }}></div>
                     {market.source}
                   </div>
-                  <span style={{ color: '#22c55e', fontWeight: 700 }}>+{market.change24h.toFixed(1)}%</span>
                 </div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1.5rem', lineHeight: 1.4, height: '3rem', overflow: 'hidden', color: 'var(--text-main)' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1.5rem', lineHeight: 1.4, color: 'var(--text-main)' }}>
                   {market.title}
                 </h3>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -238,157 +237,7 @@ export default async function Home() {
                   </div>
                 </div>
               </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* NEW: Politics Pulse Section */}
-      <div style={{ marginBottom: '4rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>⚖️ Politics Pulse</h2>
-            <span style={{ fontSize: '0.9rem', padding: '2px 8px', background: 'rgba(59, 130, 246, 0.1)', color: 'var(--primary)', borderRadius: '4px', fontWeight: 600 }}>Hot Topics</span>
-          </div>
-          <Link href="/markets?filter=politics" className="text-primary" style={{ fontWeight: 600, fontSize: '0.9rem' }}>View All &rarr;</Link>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-          {politicsMarketsData.slice(0, 4).map(market => (
-            <Link href={`/market/${market.id}`} key={market.id} style={{ textDecoration: 'none' }}>
-              <div className="card-hover" style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: '20px',
-                padding: '1.5rem',
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between'
-              }}>
-                <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--text-main)', lineHeight: 1.4 }}>
-                    {market.title}
-                  </h3>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <span className="price-indicator price-yes">{(market.yesPrice * 100).toFixed(0)}¢</span>
-                    <span className="price-indicator price-no">{(market.noPrice * 100).toFixed(0)}¢</span>
-                  </div>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Vol: ${(market.volume / 1000).toFixed(0)}k</span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* NEW: Crypto Watch Section */}
-      <div style={{ marginBottom: '4rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>₿ Crypto Watch</h2>
-            <span style={{ fontSize: '0.9rem', padding: '2px 8px', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', borderRadius: '4px', fontWeight: 600 }}>Real-Time</span>
-          </div>
-          <Link href="/markets?filter=crypto" className="text-primary" style={{ fontWeight: 600, fontSize: '0.9rem' }}>View All &rarr;</Link>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-          {cryptoMarketsData.slice(0, 4).map(market => (
-            <Link href={`/market/${market.id}`} key={market.id} style={{ textDecoration: 'none' }}>
-              <div className="card-hover" style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: '20px',
-                padding: '1.5rem',
-                borderLeft: '4px solid #f59e0b'
-              }}>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--text-main)', lineHeight: 1.4 }}>
-                  {market.title}
-                </h3>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f59e0b' }}>
-                    {(market.yesPrice * 100).toFixed(1)}¢
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Liquidity</div>
-                    <div style={{ fontWeight: 600 }}>${(market.liquidity / 1000).toFixed(0)}k</div>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* NEW: Live Sports Section */}
-      <div style={{ marginBottom: '4rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>⚽ Live Sports</h2>
-            <span style={{ fontSize: '0.9rem', padding: '2px 8px', background: '#ef4444', color: '#fff', borderRadius: '4px', fontWeight: 600 }}>LIVE</span>
-          </div>
-          <Link href="/markets?filter=sports" className="text-primary" style={{ fontWeight: 600, fontSize: '0.9rem' }}>View All &rarr;</Link>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-          {sportsMarkets.map(market => (
-            <Link href={`/market/${market.id}`} key={market.id} style={{ textDecoration: 'none' }}>
-              <div className="card-hover" style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: '16px',
-                overflow: 'hidden'
-              }}>
-                {market.image && (
-                  <div style={{ height: '120px', background: '#111', overflow: 'hidden' }}>
-                    <img src={market.image} alt={market.title} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
-                  </div>
-                )}
-                <div style={{ padding: '1.5rem' }}>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--text-main)' }}>
-                    {market.title}
-                  </h3>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <div style={{ flex: 1, background: 'rgba(255,255,255,0.05)', padding: '0.75rem', borderRadius: '8px', textAlign: 'center' }}>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Yes</div>
-                      <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary)' }}>{(market.yesPrice * 100).toFixed(0)}%</div>
-                    </div>
-                    <div style={{ flex: 1, background: 'rgba(255,255,255,0.05)', padding: '0.75rem', borderRadius: '8px', textAlign: 'center' }}>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>No</div>
-                      <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#ef4444' }}>{(market.noPrice * 100).toFixed(0)}%</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* NEW: New Markets Section */}
-      <div style={{ marginBottom: '4rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>✨ New Markets</h2>
-          <span style={{ fontSize: '0.9rem', padding: '2px 8px', background: 'rgba(59, 130, 246, 0.1)', color: 'var(--primary)', borderRadius: '4px', fontWeight: 600 }}>Just In</span>
-        </div>
-        <div style={{ display: 'flex', gap: '1.5rem', overflowX: 'auto', paddingBottom: '1rem', scrollbarWidth: 'none' }}>
-          {newMarkets.map(market => (
-            <Link href={`/market/${market.id}`} key={market.id} style={{ textDecoration: 'none', flexShrink: 0, width: '300px' }}>
-              <div className="card-hover" style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: '16px',
-                padding: '1.5rem',
-              }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>{market.category}</div>
-                <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--text-main)', height: '2.8rem', overflow: 'hidden' }}>
-                  {market.title}
-                </h3>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--primary)' }}>{(market.yesPrice * 100).toFixed(1)}¢</span>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Vol: ${(market.volume / 1000).toFixed(1)}k</span>
-                </div>
-              </div>
-            </Link>
+            </a>
           ))}
         </div>
       </div>
@@ -420,8 +269,6 @@ export default async function Home() {
         </Link>
       </div>
 
-      {/* Main Market Table */}
-      <HomeMarketTable initialMarkets={allMarketsSorted} />
 
       {/* News and Articles Section */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '3rem' }}>

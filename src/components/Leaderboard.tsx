@@ -13,9 +13,15 @@ interface Trader {
     activePositions?: number;
 }
 
-export default function Leaderboard({ onSelectTrader }: { onSelectTrader: (address: string) => void }) {
-    const [traders, setTraders] = useState<Trader[]>([]);
-    const [loading, setLoading] = useState(true);
+export default function Leaderboard({
+    onSelectTrader,
+    initialTraders = []
+}: {
+    onSelectTrader: (address: string) => void,
+    initialTraders?: Trader[]
+}) {
+    const [traders, setTraders] = useState<Trader[]>(initialTraders);
+    const [loading, setLoading] = useState(initialTraders.length === 0);
     const [timePeriod, setTimePeriod] = useState<'day' | 'week' | 'month' | 'all'>('all');
     const [category, setCategory] = useState<string>('All');
 
@@ -29,6 +35,11 @@ export default function Leaderboard({ onSelectTrader }: { onSelectTrader: (addre
     const categories = ['All', 'Politics', 'Sports', 'Crypto', 'Business'];
 
     useEffect(() => {
+        // Skip fetching if we already have initial traders and haven't changed filters yet
+        if (traders.length > 0 && timePeriod === 'all' && category === 'All' && !loading) {
+            return;
+        }
+
         const fetchLeaderboardData = async () => {
             setLoading(true);
             try {

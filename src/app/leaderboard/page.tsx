@@ -12,7 +12,11 @@ export const metadata: Metadata = {
     }
 };
 
-export default function LeaderboardPage() {
+import { fetchLeaderboardV2 } from '@/lib/api';
+
+export default async function LeaderboardPage() {
+    const initialTraders = await fetchLeaderboardV2('all', 50);
+
     return (
         <main className={`container ${styles.leaderboardContainer}`}>
             <div className={styles.headerSection}>
@@ -24,7 +28,7 @@ export default function LeaderboardPage() {
                 </p>
             </div>
 
-            <LeaderboardClient />
+            <LeaderboardClient initialTraders={initialTraders} />
         </main>
     );
 }

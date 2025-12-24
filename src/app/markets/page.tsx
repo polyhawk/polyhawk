@@ -30,8 +30,8 @@ export default async function MarketsPage({
     const filter = params.filter || 'live';
 
     let markets: Market[] = [];
-    let title = 'Live Markets';
-    let subtitle = 'Currently active prediction markets';
+    let title = 'Live Events';
+    let subtitle = 'Currently active prediction events on Polymarket';
 
     if (filter === 'new') {
         markets = await fetchNewMarkets();
@@ -139,9 +139,9 @@ export default async function MarketsPage({
                                                 {market.image && (
                                                     <img src={market.image} alt="" className={styles.marketThumb} />
                                                 )}
-                                                <Link href={`/market/${market.id}`} className={styles.marketLinkMain}>
+                                                <a href={market.url} target="_blank" className={styles.marketLinkMain}>
                                                     {market.title}
-                                                </Link>
+                                                </a>
                                             </div>
                                         </td>
                                         <td>
@@ -153,9 +153,9 @@ export default async function MarketsPage({
                                         <td className={styles.fontNumeric}>{formatCurrency(market.liquidity)}</td>
                                         <td className={styles.fontNumeric}>{formatCurrency(market.volume)}</td>
                                         <td>
-                                            <Link href={market.url} target="_blank" className="btn btn-secondary btn-sm">
-                                                Trade
-                                            </Link>
+                                            <a href={market.url} target="_blank" className="btn btn-secondary btn-sm">
+                                                Polymarket
+                                            </a>
                                         </td>
                                     </tr>
                                 ))}
@@ -167,7 +167,7 @@ export default async function MarketsPage({
                     <div className="mobile-only">
                         <div className={styles.mobileCardStack}>
                             {markets.map((market, i) => (
-                                <Link href={`/market/${market.id}`} key={market.id} className={styles.marketMobileCard}>
+                                <a href={market.url} target="_blank" key={market.id} className={styles.marketMobileCard}>
                                     <div className={styles.mCardHeader}>
                                         <span className={styles.mCardRank}>#{i + 1}</span>
                                         <div className={styles.mCardTitle}>{market.title}</div>
@@ -188,7 +188,7 @@ export default async function MarketsPage({
                                         <span>Vol: {formatCurrency(market.volume)}</span>
                                         <span className="btn btn-secondary btn-xs">Details</span>
                                     </div>
-                                </Link>
+                                </a>
                             ))}
                         </div>
                     </div>

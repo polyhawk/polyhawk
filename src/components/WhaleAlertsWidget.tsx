@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { WhaleAlert } from '@/lib/api';
 
@@ -9,23 +9,76 @@ interface WhaleAlertsWidgetProps {
 }
 
 export default function WhaleAlertsWidget({ initialAlerts }: WhaleAlertsWidgetProps) {
+    const [alerts, setAlerts] = useState<WhaleAlert[]>(initialAlerts);
     const [timeFrame, setTimeFrame] = useState('24H');
+    const STORAGE_KEY = 'polyhawk_whale_alerts_v1';
 
-    // Filter Logic
-    const filteredAlerts = initialAlerts.filter(alert => {
-        // Time Frame
+    // 1. Load from storage and merge with initial alerts on mount
+    useEffect(() => {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            try {
+                const parsed = JSON.parse(stored);
+                setAlerts(prev => {
+                    const existingIds = new Set(parsed.map((a: WhaleAlert) => a.id));
+                    const uniqueNew = initialAlerts.filter(a => !existingIds.has(a.id));
+                    const combined = [...uniqueNew, ...parsed]
+                        .sort((a, b) => b.timestamp - a.timestamp)
+                        .slice(0, 1000); // Increased storage limit
+
+                    // Update storage with combined results
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(combined));
+                    return combined;
+                });
+            } catch (e) {
+                console.error('Failed to parse stored alerts', e);
+            }
+        } else if (initialAlerts.length > 0) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(initialAlerts));
+        }
+    }, [initialAlerts]);
+
+    // 2. Poll for new alerts every 15 seconds (reduced from 30s for more real-time feel)
+    useEffect(() => {
+        const poll = async () => {
+            try {
+                const response = await fetch('/api/whale-alerts', { cache: 'no-store' });
+                if (!response.ok) return;
+                const newAlerts: WhaleAlert[] = await response.json();
+
+                setAlerts(prev => {
+                    const existingIds = new Set(prev.map(a => a.id));
+                    const uniqueNew = newAlerts.filter(a => !existingIds.has(a.id));
+                    if (uniqueNew.length === 0) return prev;
+
+                    const combined = [...uniqueNew, ...prev]
+                        .sort((a, b) => b.timestamp - a.timestamp)
+                        .slice(0, 1000);
+
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(combined));
+                    return combined;
+                });
+            } catch (err) {
+                console.error('Polling error:', err);
+            }
+        };
+
+        const interval = setInterval(poll, 15000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // Filter Logic based on selected time frame
+    const filteredAlerts = alerts.filter(alert => {
         const secondsAgo = Date.now() / 1000 - alert.timestamp;
         if (timeFrame === '10M' && secondsAgo > 600) return false;
         if (timeFrame === '1H' && secondsAgo > 3600) return false;
         if (timeFrame === '24H' && secondsAgo > 86400) return false;
         if (timeFrame === '7D' && secondsAgo > 604800) return false;
-
         return true;
     });
 
-    // Display only top 5 of filtered
+    // Display only top 5 of filtered for the widget
     const displayedAlerts = filteredAlerts.slice(0, 5);
-
     const timeFrames = ['10M', '1H', '24H'];
 
     return (
@@ -86,7 +139,8 @@ export default function WhaleAlertsWidget({ initialAlerts }: WhaleAlertsWidgetPr
                         const minutes = Math.floor(seconds / 60);
                         if (minutes < 60) return `${minutes}m ago`;
                         const hours = Math.floor(minutes / 60);
-                        return `${hours}h ago`;
+                        if (hours < 24) return `${hours}h ago`;
+                        return `${Math.floor(hours / 24)}d ago`;
                     })();
 
                     const whaleEmoji = alert.amount >= 50000 ? '🐋🐋🐋' : alert.amount >= 20000 ? '🐋🐋' : '🐋';
@@ -122,7 +176,7 @@ export default function WhaleAlertsWidget({ initialAlerts }: WhaleAlertsWidgetPr
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
                                         <span style={{ fontSize: '1.25rem' }}>{whaleEmoji}</span>
                                         <div>
-                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{timeAgo} • {alert.category}</div>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{timeAgo}</div>
                                             <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--primary)' }}>
                                                 ${alert.amount.toLocaleString()}
                                             </div>
@@ -165,14 +219,14 @@ export default function WhaleAlertsWidget({ initialAlerts }: WhaleAlertsWidgetPr
                                         </div>
                                     </div>
                                 </div>
-                                <Link
+                                <a
                                     href={alert.marketUrl}
                                     target="_blank"
                                     className="btn btn-primary"
                                     style={{ padding: '0.6rem 1.25rem', whiteSpace: 'nowrap' }}
                                 >
-                                    Trade →
-                                </Link>
+                                    Polymarket
+                                </a>
                             </div>
                         </div>
                     );

@@ -81,9 +81,9 @@ export default function HomeMarketTable({ initialMarkets }: HomeMarketTableProps
                                     </div>
                                 </td>
                                 <td style={{ padding: '1rem' }}>
-                                    <Link href={`/market/${market.id}`} className="btn btn-secondary" style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem' }}>
-                                        Trade
-                                    </Link>
+                                    <a href={market.url} target="_blank" className="btn btn-secondary" style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem' }}>
+                                        Polymarket
+                                    </a>
                                 </td>
                             </tr>
                         ))}

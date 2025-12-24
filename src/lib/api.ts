@@ -458,7 +458,7 @@ export async function fetchSignals(): Promise<Signal[]> {
     signals.push({
         id: 'tw-1',
         type: 'TWITTER',
-        marketTitle: 'Election 2024 Winner',
+        marketTitle: 'Election 2028 Winner',
         description: 'New poll aggregation shows slight swing in key states. Market adjusting rapidly. @PolymarketWhale says "Buy the dip".',
         timestamp: '10m ago',
         severity: 'MEDIUM',
@@ -675,139 +675,91 @@ export async function fetchWhaleAlertsV2(): Promise<WhaleAlert[]> {
             }
         }
 
-        // Fetch trades using Authenticated Builder API (CLOB)
-        // We use the authenticated client to get higher rate limits and real-time data
+        // Fetch trades in multiple batches to get a longer history
         let trades: any[] = [];
-        let source = 'CLOB';
+        const BATCH_COUNT = 3;
+        let lastTimestamp = 0;
 
-        try {
-            trades = await polymarketClient.getTrades(500);
-        } catch (e) {
-            console.error('CLOB Trades fetch failed, falling back to public Data API...', e);
-            // Fallback to public Data API
+        for (let b = 0; b < BATCH_COUNT; b++) {
             try {
-                const response = await fetch('https://data-api.polymarket.com/trades?limit=500&takerOnly=true&sortBy=TIMESTAMP&sortDirection=DESC', {
+                let url = `https://data-api.polymarket.com/trades?limit=1000&sortBy=TIMESTAMP&sortDirection=DESC`;
+                if (lastTimestamp > 0) {
+                    // Using timestampLT if supported, or just offset if not. 
+                    // Data API usually supports TIMESTAMP sorting with cursors.
+                    // For now, we'll try to see if we can get older ones by limit=1000.
+                    // Actually, let's just use limit 1000 for one big fetch first.
+                    // If we want more, we need the cursor from the previous response.
+                    // But if it's not provided, we might be stuck.
+                }
+
+                // Let's stick to 1000 for now but ensure we filter correctly.
+                // Wait, if 1000 is only 2 minutes, we NEED more.
+                // I'll try to use the 'cursor' or 'timestamp' from the last trade.
+                const response = await fetch(url + (lastTimestamp > 0 ? `&timestampLT=${lastTimestamp}` : ''), {
                     cache: 'no-store',
-                    signal: AbortSignal.timeout(10000)
+                    next: { revalidate: 60 }
                 });
+
                 if (response.ok) {
-                    trades = await response.json();
-                    source = 'DATA_API';
+                    const batch = await response.json();
+                    if (Array.isArray(batch) && batch.length > 0) {
+                        trades = [...trades, ...batch];
+                        const lastTrade = batch[batch.length - 1];
+                        lastTimestamp = lastTrade.timestamp;
+                    } else {
+                        break;
+                    }
+                } else {
+                    break;
                 }
             } catch (err) {
-                console.error('Data API fallback failed:', err);
-                return [];
+                console.error('Data API fetch failed:', err);
+                break;
             }
         }
 
-        if (!Array.isArray(trades)) {
-            console.error('Invalid trades response format');
+        if (!Array.isArray(trades) || trades.length === 0) {
             return [];
         }
 
         const whaleAlerts: WhaleAlert[] = [];
-        const MIN_WHALE_VALUE = 5000; // Strictly >$5000 USD as requested
-        const uniqueMarketIds = new Set<string>();
-        const validTrades: any[] = [];
+        const MIN_WHALE_VALUE = 5000;
+        const seenTrades = new Set<string>();
 
-        // 1. Filter trades & collect Market IDs
         for (const trade of trades) {
-            // Normalize fields (CLOB uses snake_case, Data API uses camelCase)
             const amt = parseFloat(trade.size || trade.amount || '0');
             const price = parseFloat(trade.price || '0.5');
             const tradeValue = amt * price;
 
-            // Check if it's a whale trade strictly by USD value
             if (tradeValue >= MIN_WHALE_VALUE) {
-                const id = trade.market || trade.asset_id || trade.asset || trade.conditionId;
-                if (id) {
-                    uniqueMarketIds.add(id);
-                    validTrades.push(trade);
-                }
+                const tradeId = `${trade.transactionHash || trade.id}-${trade.timestamp}`;
+                if (seenTrades.has(tradeId)) continue;
+                seenTrades.add(tradeId);
+
+                const conditionId = trade.conditionId || trade.asset || 'unknown';
+                const eventInfo = conditionToEvent.get(conditionId);
+
+                whaleAlerts.push({
+                    id: tradeId,
+                    marketId: conditionId,
+                    marketTitle: eventInfo?.title || trade.title || 'Unknown Market',
+                    marketSlug: eventInfo?.slug || trade.slug || 'unknown',
+                    walletAddress: trade.proxyWallet || trade.taker || trade.maker || 'Unknown',
+                    amount: tradeValue,
+                    side: (trade.outcome === 'Yes' || trade.outcome === 'YES') ? 'YES' : 'NO',
+                    price: price,
+                    timestamp: trade.timestamp || Date.now() / 1000,
+                    marketUrl: getPolymarketUrl(`event/${eventInfo?.slug || trade.slug}`),
+                    tradeValue: tradeValue,
+                    icon: eventInfo?.icon || trade.icon || 'https://polymarket.com/favicon.ico',
+                    category: eventInfo?.category || 'Market',
+                    debug: false
+                });
+
+                if (whaleAlerts.length >= 100) break; // Increased to 100
             }
         }
 
-        // 2. Identify missing markets
-        const missingMarkets = Array.from(uniqueMarketIds).filter(id => !conditionToEvent.has(id));
-
-        // 3. Batch fetch missing metadata (Parallel)
-        // We limit concurrency to avoid rate limits
-        const FETCH_BATCH_SIZE = 5;
-        for (let i = 0; i < missingMarkets.length; i += FETCH_BATCH_SIZE) {
-            const batch = missingMarkets.slice(i, i + FETCH_BATCH_SIZE);
-            await Promise.all(batch.map(async (id) => {
-                try {
-                    // Try fetching from gamma markets endpoint
-                    const res = await fetch(`https://gamma-api.polymarket.com/markets/${id}`, {
-                        next: { revalidate: 3600 } // Cache long term
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        // Extract category from tags
-                        const cat = data.tags?.[0]?.label || data.tags?.[0] || data.category || 'Other';
-                        const eventInfo = {
-                            title: data.question || data.groupItemTitle || 'Unknown Market',
-                            slug: data.slug,
-                            eventId: data.events?.[0]?.id || data.conditionId,
-                            category: cat,
-                            icon: data.icon || data.image || data.events?.[0]?.icon || data.events?.[0]?.image
-                        };
-                        conditionToEvent.set(id, eventInfo);
-                    }
-                } catch (e) {
-                    // ignore individual failures 
-                }
-            }));
-        }
-
-        // 4. Build Alerts
-        const seenTrades = new Set<string>();
-
-        for (const trade of validTrades) {
-            const tradeId = `${trade.id || trade.transactionHash}-${trade.timestamp}`;
-            if (seenTrades.has(tradeId)) continue;
-            seenTrades.add(tradeId);
-
-            const marketIdentifier = trade.market || trade.asset_id || trade.asset || trade.conditionId;
-
-            // Try map first, then fallback to trade's own metadata (Data API)
-            let eventInfo = conditionToEvent.get(marketIdentifier);
-
-            if (!eventInfo && source === 'DATA_API' && trade.title) {
-                eventInfo = {
-                    title: trade.title,
-                    slug: trade.slug,
-                    eventId: trade.eventSlug, // approximation
-                    category: 'Other',
-                    icon: trade.icon
-                };
-            }
-
-            const marketTitle = eventInfo?.title || 'Unknown Market';
-            const marketSlug = eventInfo?.slug || trade.slug || 'unknown';
-
-            // Filter out "Unknown Market" if we want strictly high quality
-            const displayTitle = marketTitle === 'Unknown Market' ? `Market ${marketIdentifier?.slice(0, 6)}...` : marketTitle;
-
-            whaleAlerts.push({
-                id: tradeId,
-                marketId: eventInfo?.eventId || marketIdentifier,
-                marketTitle: displayTitle,
-                marketSlug: marketSlug,
-                walletAddress: trade.taker || trade.maker || trade.trader_address || trade.proxyWallet || 'Unknown',
-                amount: parseFloat(trade.size || trade.amount || '0') * parseFloat(trade.price || '0.5'),
-                side: (trade.side === 'BUY' || trade.side === 'buy') ? 'YES' : 'NO',
-                price: parseFloat(trade.price || '0.5'),
-                timestamp: trade.timestamp || Date.now() / 1000,
-                marketUrl: getPolymarketUrl(`event/${marketSlug}`),
-                tradeValue: parseFloat(trade.size || trade.amount || '0') * parseFloat(trade.price || '0.5'),
-                icon: eventInfo?.icon || 'NO_ICON',
-                category: eventInfo?.category || 'Other',
-                debug: true
-            });
-
-            if (whaleAlerts.length >= 50) break;
-        }
 
         // Sort by timestamp
         whaleAlerts.sort((a, b) => b.timestamp - a.timestamp);
@@ -818,14 +770,14 @@ export async function fetchWhaleAlertsV2(): Promise<WhaleAlert[]> {
                 {
                     id: 'mock-1',
                     marketId: 'mock-market-1',
-                    marketTitle: 'Will Bitcoin reach $100k in 2024?',
-                    marketSlug: 'bitcoin-100k-2024',
+                    marketTitle: 'Will Bitcoin reach $100k in 2026?',
+                    marketSlug: 'bitcoin-100k-2026',
                     walletAddress: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
                     amount: 25000,
                     side: 'YES',
                     price: 0.65,
                     timestamp: Date.now() / 1000 - 300,
-                    marketUrl: getPolymarketUrl('event/bitcoin-100k-2024'),
+                    marketUrl: getPolymarketUrl('event/bitcoin-100k-2026'),
                     tradeValue: 16250,
                     category: 'Crypto',
                     icon: 'https://polymarket-upload.s3.us-east-2.amazonaws.com/BTC+fullsize.png'

@@ -13,20 +13,20 @@ export const metadata: Metadata = {
   viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
   robots: 'index, follow',
   alternates: {
-    canonical: 'https://polyhawk-web.vercel.app/markets',
+    canonical: 'https://polyhawk.fun/markets',
   },
 
   // Open Graph
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://polyhawk-web.vercel.app',
+    url: 'https://polyhawk.fun',
     siteName: 'Poly Hawk',
     title: 'Poly Hawk | Live Prediction Markets',
     description: 'Real-time prediction market aggregator with live trading, liquidity, and volume data.',
     images: [
       {
-        url: 'https://polyhawk-web.vercel.app/og-image.jpg',
+        url: 'https://polyhawk.fun/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'Poly Hawk - Real-Time Prediction Market Aggregator',
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Poly Hawk Prediction Markets',
     description: 'Live prediction markets with real-time data on politics, crypto, and more.',
-    images: ['https://polyhawk-web.vercel.app/og-image.jpg'],
+    images: ['https://polyhawk.fun/og-image.jpg'],
     creator: '@polyhawk',
   },
 };

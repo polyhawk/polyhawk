@@ -16,7 +16,7 @@ const ARTICLE_IMAGES: Record<string, string> = {
 const ARTICLE_CONTENT: Record<string, { title: string; date: string; readTime: string; content: React.ReactNode }> = {
     'what-are-prediction-markets': {
         title: 'What Are Prediction Markets?',
-        date: 'Dec 24, 2024',
+        date: 'Dec 24, 2025',
         readTime: '15 min read',
         content: (
             <>
@@ -50,7 +50,7 @@ const ARTICLE_CONTENT: Record<string, { title: string; date: string; readTime: s
     },
     'how-to-arbitrage': {
         title: 'Arbitrage Strategy 101: Risk-Minimization Tactics',
-        date: 'Dec 24, 2024',
+        date: 'Dec 24, 2025',
         readTime: '20 min read',
         content: (
             <>
@@ -100,7 +100,7 @@ const ARTICLE_CONTENT: Record<string, { title: string; date: string; readTime: s
     },
     'understanding-order-books': {
         title: 'Reading the Order Book: Spotting the Real Moves',
-        date: 'Dec 24, 2024',
+        date: 'Dec 24, 2025',
         readTime: '15 min read',
         content: (
             <>
@@ -129,7 +129,7 @@ const ARTICLE_CONTENT: Record<string, { title: string; date: string; readTime: s
     },
     'polymarket-vs-kalshi': {
         title: 'Polymarket vs. Kalshi: Which One Should You Actually Use?',
-        date: 'Dec 24, 2024',
+        date: 'Dec 24, 2025',
         readTime: '12 min read',
         content: (
             <>
@@ -154,7 +154,7 @@ const ARTICLE_CONTENT: Record<string, { title: string; date: string; readTime: s
     },
     'managing-risk-bankroll': {
         title: 'The Hidden Secret of Pro Traders: Bankroll Management',
-        date: 'Dec 24, 2024',
+        date: 'Dec 24, 2025',
         readTime: '15 min read',
         content: (
             <>
@@ -180,7 +180,7 @@ const ARTICLE_CONTENT: Record<string, { title: string; date: string; readTime: s
     },
     'identifying-positive-ev': {
         title: 'Finding +EV: Stop Guessing, Start Calculating',
-        date: 'Dec 24, 2024',
+        date: 'Dec 24, 2025',
         readTime: '18 min read',
         content: (
             <>
@@ -218,7 +218,7 @@ const ARTICLE_CONTENT: Record<string, { title: string; date: string; readTime: s
     },
     'regulatory-landscape': {
         title: 'The Future of Regulation: Is Your Trading Legal?',
-        date: 'Dec 24, 2024',
+        date: 'Dec 24, 2025',
         readTime: '12 min read',
         content: (
             <>
@@ -243,7 +243,7 @@ const ARTICLE_CONTENT: Record<string, { title: string; date: string; readTime: s
     },
     'impact-of-news-on-markets': {
         title: 'Trading News Events: How to Win the Information War',
-        date: 'Dec 24, 2024',
+        date: 'Dec 24, 2025',
         readTime: '15 min read',
         content: (
             <>
@@ -271,7 +271,7 @@ const ARTICLE_CONTENT: Record<string, { title: string; date: string; readTime: s
     },
     'correlation-trading': {
         title: 'Correlation Trading: The Art of the "Chain Reaction"',
-        date: 'Dec 24, 2024',
+        date: 'Dec 24, 2025',
         readTime: '18 min read',
         content: (
             <>
@@ -303,7 +303,7 @@ const ARTICLE_CONTENT: Record<string, { title: string; date: string; readTime: s
     },
     'history-of-prediction-markets': {
         title: 'The History of Prediction Markets: From DARPA to DeFi',
-        date: 'Dec 24, 2024',
+        date: 'Dec 24, 2025',
         readTime: '15 min read',
         content: (
             <>
@@ -327,7 +327,7 @@ const ARTICLE_CONTENT: Record<string, { title: string; date: string; readTime: s
     },
     'hedging-real-world-risks': {
         title: 'Beyond Betting: Hedging Real World Risks',
-        date: 'Dec 24, 2024',
+        date: 'Dec 24, 2025',
         readTime: '12 min read',
         content: (
             <>
@@ -338,7 +338,7 @@ const ARTICLE_CONTENT: Record<string, { title: string; date: string; readTime: s
 
                 <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: '1.5rem', borderRadius: '12px', margin: '2rem 0', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
                     <h3 style={{ marginTop: 0, color: '#10b981' }}>Example: The Business Hedge</h3>
-                    <p>Imagine you run a solar panel installation company. Your business thrives when the government provides "Green Energy Subsidies." There is a market: "Will the Green Subsidy be repealed in 2025?"</p>
+                    <p>Imagine you run a solar panel installation company. Your business thrives when the government provides "Green Energy Subsidies." There is a market: "Will the Green Subsidy be repealed in 2026?"</p>
                     <ul style={{ paddingLeft: '1.5rem' }}>
                         <li>If you buy "Yes" (Repeal), and the subsidy is killed, your business loses money, but your Polymarket position pays out.</li>
                         <li>This payout provides the cash flow you need to keep your employees while you pivot your business model.</li>

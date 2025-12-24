@@ -44,7 +44,7 @@ export default async function MarketPage({ params }: { params: Promise<{ id: str
         <main className="container" style={{ paddingBottom: '6rem' }}>
             <div style={{ marginTop: '2rem', marginBottom: '2rem' }}>
                 <Link href="/markets" className="text-secondary" style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span>&larr;</span> Back to All Markets
+                    <span>&larr;</span> Back to Events
                 </Link>
             </div>
 
@@ -180,34 +180,17 @@ export default async function MarketPage({ params }: { params: Promise<{ id: str
                 {/* Right Column: Trading & Community */}
                 <div className="side-column" style={{ position: 'sticky', top: '2rem', height: 'fit-content' }}>
                     <div style={{ background: 'var(--surface)', padding: '2rem', borderRadius: '24px', border: '1px solid var(--border)', marginBottom: '2rem' }}>
-                        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '2rem' }}>Place Trade</h3>
-
-                        <div style={{ marginBottom: '2rem' }}>
-                            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-                                <div style={{
-                                    flex: 1, padding: '1.5rem', borderRadius: '16px', border: '2px solid #22c55e', background: 'rgba(34, 197, 94, 0.05)', textAlign: 'center', cursor: 'pointer'
-                                }}>
-                                    <div style={{ fontSize: '0.8rem', color: '#22c55e', fontWeight: 700, marginBottom: '0.25rem' }}>YES</div>
-                                    <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>{(yesPrice * 100).toFixed(0)}¢</div>
-                                </div>
-                                <div style={{
-                                    flex: 1, padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--border)', textAlign: 'center', cursor: 'pointer'
-                                }}>
-                                    <div style={{ fontSize: '0.8rem', color: '#ef4444', fontWeight: 700, marginBottom: '0.25rem' }}>NO</div>
-                                    <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>{(noPrice * 100).toFixed(0)}¢</div>
-                                </div>
-                            </div>
-
-                            <Link
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <a
                                 href={market.url}
                                 target="_blank"
                                 className="btn btn-primary"
                                 style={{ width: '100%', padding: '1.25rem', fontSize: '1.1rem', fontWeight: 700, textAlign: 'center', display: 'block' }}
                             >
-                                Executive Trade on Polymarket
-                            </Link>
+                                Polymarket
+                            </a>
                             <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>
-                                Fully decentralized execution with 0% fees.
+                                View this event directly on Polymarket.
                             </p>
                         </div>
 
@@ -227,30 +210,6 @@ export default async function MarketPage({ params }: { params: Promise<{ id: str
                         </div>
                     </div>
 
-                    {/* Community Sentiment */}
-                    <div style={{ background: 'var(--surface)', padding: '2rem', borderRadius: '24px', border: '1px solid var(--border)' }}>
-                        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1.5rem' }}>Live Commentary</h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                            {[
-                                { user: 'WhaleAlert', text: 'Just dropped $40k on YES. This is a lock.', icon: '🐋' },
-                                { user: 'BearishNinja', text: 'Polling data doesnt support this price. NO is the play.', icon: '🥷' },
-                                { user: 'CryptoKev', text: 'Volatility looking crazy, keeping my stack on the side.', icon: '📈' }
-                            ].map((comment, i) => (
-                                <div key={i} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>
-                                        {comment.icon}
-                                    </div>
-                                    <div>
-                                        <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{comment.user}</div>
-                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{comment.text}</div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <button style={{ width: '100%', marginTop: '1.5rem', padding: '0.75rem', background: 'transparent', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-secondary)', fontSize: '0.85rem', cursor: 'pointer' }}>
-                            Show 12 More Comments
-                        </button>
-                    </div>
                 </div>
             </div>
 

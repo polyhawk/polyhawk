@@ -179,10 +179,6 @@ export default function WhaleAlertsClient({ initialAlerts }: WhaleAlertsClientPr
                                             )}
                                         </span>
                                     </div>
-                                    <div>
-                                        <span className={styles.metaLabel}>Category: </span>
-                                        <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{alert.category || 'Other'}</span>
-                                    </div>
                                 </div>
                             </div>
                         </div>
