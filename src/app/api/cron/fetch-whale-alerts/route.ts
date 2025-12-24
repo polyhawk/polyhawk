@@ -4,7 +4,8 @@ import { fetchWhaleAlertsV2 } from '@/lib/api';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-// This endpoint is called by Vercel Cron every 5 minutes
+// This endpoint is called by Vercel Cron every 6 hours
+// It can also be called manually to trigger an immediate fetch
 export async function GET(request: Request) {
     try {
         // Verify this is a cron request (optional security check)
