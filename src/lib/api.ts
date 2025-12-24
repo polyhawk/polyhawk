@@ -640,9 +640,9 @@ export async function fetchWhaleAlertsV2(): Promise<WhaleAlert[]> {
         // This is crucial because data-api trades only give us condition_id/market_id
         let events = [];
         try {
-            const eventsResponse = await fetch('https://gamma-api.polymarket.com/events?limit=100&active=true&closed=false&order=volume24hr&ascending=false', {
+            const eventsResponse = await fetch('https://gamma-api.polymarket.com/events?limit=500&active=true&closed=false&order=volume24hr&ascending=false', {
                 cache: 'force-cache',
-                next: { revalidate: 60 } // Cache events for 1 min
+                next: { revalidate: 300 } // Cache events for 5 mins
             });
             if (eventsResponse.ok) {
                 events = await eventsResponse.json();
@@ -723,13 +723,23 @@ export async function fetchWhaleAlertsV2(): Promise<WhaleAlert[]> {
         }
 
         const whaleAlerts: WhaleAlert[] = [];
-        const MIN_WHALE_VALUE = 5000;
+        const MIN_WHALE_VALUE = 2000; // Lowered from 5000 to show more activity
         const seenTrades = new Set<string>();
 
         for (const trade of trades) {
-            const amt = parseFloat(trade.size || trade.amount || '0');
+            const size = parseFloat(trade.size || '0');
+            const amount = parseFloat(trade.amount || '0');
             const price = parseFloat(trade.price || '0.5');
-            const tradeValue = amt * price;
+
+            // Robust USD value calculation: 
+            // 1. If size is present, it's usually shares. Value = size * price.
+            // 2. If size is missing but amount is present, amount is often the USD value in newer APIs.
+            let tradeValue = 0;
+            if (size > 0) {
+                tradeValue = size * price;
+            } else {
+                tradeValue = amount;
+            }
 
             if (tradeValue >= MIN_WHALE_VALUE) {
                 const tradeId = `${trade.transactionHash || trade.id}-${trade.timestamp}`;

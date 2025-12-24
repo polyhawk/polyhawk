@@ -42,12 +42,17 @@ export default function WhaleAlertsClient({ initialAlerts }: WhaleAlertsClientPr
                     const uniqueNew = initialAlerts.filter(a => !existingIds.has(a.id));
                     const combined = [...uniqueNew, ...parsed]
                         .sort((a, b) => b.timestamp - a.timestamp)
-                        .slice(0, 500);
+                        .slice(0, 1000); // Increased to 1000
+
+                    // Update storage with merged results
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(combined));
                     return combined;
                 });
             } catch (e) {
                 console.error('Failed to parse stored alerts', e);
             }
+        } else if (initialAlerts.length > 0) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(initialAlerts));
         }
     }, [initialAlerts]);
 
@@ -66,7 +71,7 @@ export default function WhaleAlertsClient({ initialAlerts }: WhaleAlertsClientPr
 
                 const combined = [...uniqueNew, ...prev]
                     .sort((a, b) => b.timestamp - a.timestamp)
-                    .slice(0, 500);
+                    .slice(0, 1000);
 
                 if (typeof window !== 'undefined') {
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(combined));
@@ -80,7 +85,8 @@ export default function WhaleAlertsClient({ initialAlerts }: WhaleAlertsClientPr
     };
 
     useEffect(() => {
-        const interval = setInterval(fetchWhaleAlerts, 30000);
+        // Reduced to 15s to match homepage for consistent live experience
+        const interval = setInterval(fetchWhaleAlerts, 15000);
         return () => clearInterval(interval);
     }, []);
 
