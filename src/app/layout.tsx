@@ -69,7 +69,7 @@ export default function RootLayout({
               <div>
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1rem' }}>POLY<span className="text-primary">HAWK</span></h3>
                 <p className="text-secondary" style={{ maxWidth: '400px', lineHeight: 1.6, marginBottom: '1.5rem' }}>
-                  The leading aggregator for prediction markets, providing real-time data, signals, and analytics for informed trading.
+                  Advanced prediction market insights for smarter trading | Portfolio & whale tracking | wallet analytics, news, and learn
                 </p>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                   <a href="https://x.com/PolyHawk0" target="_blank" rel="noopener noreferrer" style={{

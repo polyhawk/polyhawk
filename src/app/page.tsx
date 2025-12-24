@@ -1,4 +1,4 @@
-import Link from 'next/link'; 
+import Link from 'next/link';
 import { fetchPolymarketTrending, fetchKalshiMarkets, fetchNews, POLYMARKET_REFERRAL, fetchMarketsByCategory, fetchNewMarkets, fetchWhaleAlertsV2 as fetchWhaleAlerts } from '@/lib/api';
 import { formatCurrency } from '@/data/markets';
 import NewsletterSection from '@/components/NewsletterSection';
@@ -205,7 +205,7 @@ export default async function Home() {
       {/* Featured Market Table (Formerly Top Gainers) */}
       <div style={{ marginBottom: '4rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>🚀 Trending Opportunities</h2>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>🚀 Trending</h2>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
           {topGainers.map(market => (
