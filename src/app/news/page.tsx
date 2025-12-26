@@ -80,9 +80,7 @@ export default async function NewsPage() {
                 ))}
             </div>
 
-            <div style={{ marginTop: '5rem', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem', opacity: 0.6 }}>
-                Synthesized from CoinDesk, The Block, Cointelegraph, and Polymarket Data. Updated every minute.
-            </div>
+
         </main>
     );
 }

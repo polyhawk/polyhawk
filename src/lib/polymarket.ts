@@ -34,7 +34,7 @@ export class PolymarketClient {
         return hmac.digest('base64');
     }
 
-    private async request<T>(options: RequestOptions): Promise<T> {
+    public async request<T>(options: RequestOptions): Promise<T> {
         const { method, path, body, isPublic } = options;
         const timestamp = Date.now() / 1000;
         const bodyStr = body ? JSON.stringify(body) : undefined;

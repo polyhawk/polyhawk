@@ -69,7 +69,7 @@ export default function RootLayout({
               <div>
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1rem' }}>POLY<span className="text-primary">HAWK</span></h3>
                 <p className="text-secondary" style={{ maxWidth: '400px', lineHeight: 1.6, marginBottom: '1.5rem' }}>
-                  Advanced prediction market insights for smarter trading | Portfolio & whale tracking | wallet analytics, news, and learn
+                  Advanced prediction market insights for smarter trading
                 </p>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                   <a href="https://x.com/PolyHawk0" target="_blank" rel="noopener noreferrer" style={{
@@ -102,7 +102,10 @@ export default function RootLayout({
             }}>
               <p style={{ marginBottom: '1rem' }}>IMPORTANT DISCLAIMER:</p>
               <p>
-                All content provided herein our website, hyperlinked sites, associated applications, forums, blogs, social media accounts and other platforms ("Site") is for your general information only, procured from third party sources. We make no warranties of any kind in relation to our content, including but not limited to accuracy and updatedness. No part of the content that we provide constitutes financial advice, legal advice or any other form of advice meant for your specific reliance for any purpose. Any use or reliance on our content is solely at your own risk and discretion. You should conduct your own research, review, analyse and verify our content before relying on them. Trading is a highly risky activity that can lead to major losses, please therefore consult your financial advisor before making any decision. No content on our Site is meant to be a solicitation or offer.
+                We are not affiliated with anyone and do not offer trading or anything. This is for informational purposes only.
+              </p>
+              <p style={{ marginTop: '0.5rem', opacity: 0.7 }}>
+                All content provided herein our website, hyperlinked sites, associated applications, forums, blogs, social media accounts and other platforms ("Site") is for your general information only, procured from third party sources. We make no warranties of any kind in relation to our content, including but not limited to accuracy and updatedness. No part of the content that we provide constitutes financial advice, legal advice or any other form of advice meant for your specific reliance for any purpose.
               </p>
               <p style={{ marginTop: '1rem' }}>&copy; {new Date().getFullYear()} Poly Hawk. All rights reserved.</p>
             </div>

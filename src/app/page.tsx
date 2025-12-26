@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { fetchPolymarketTrending, fetchKalshiMarkets, fetchNews, POLYMARKET_REFERRAL, fetchMarketsByCategory, fetchNewMarkets, fetchWhaleAlertsV2 as fetchWhaleAlerts } from '@/lib/api';
 import { formatCurrency } from '@/data/markets';
-import NewsletterSection from '@/components/NewsletterSection';
 import HomeMarketTable from '@/components/HomeMarketTable';
 import WhaleAlertsWidget from '@/components/WhaleAlertsWidget';
+import HawkoButton from '@/components/HawkoButton';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -86,12 +86,13 @@ export default async function Home() {
           lineHeight: 1.6,
           fontSize: 'clamp(1rem, 4vw, 1.25rem)'
         }}>
-          Advanced prediction market insights for smarter trading | Portfolio & whale tracking | wallet analytics, news, and learn
+          Advanced prediction market insights for smarter trading
         </p>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <a href={POLYMARKET_REFERRAL} target="_blank" className="btn btn-primary" style={{ fontSize: '1rem', padding: '0.8rem 1.5rem', flex: '1 1 auto', maxWidth: '300px' }}>
             Polymarket
           </a>
+          <HawkoButton />
         </div>
       </div>
 
@@ -247,27 +248,7 @@ export default async function Home() {
         <WhaleAlertsWidget initialAlerts={whaleAlertsData} />
       </div>
 
-      {/* Leaderboard Teaser */}
-      <div style={{
-        marginBottom: '4rem',
-        padding: '3rem',
-        background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(30, 58, 138, 0.05) 100%)',
-        borderRadius: '32px',
-        border: '1px solid var(--border)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '2rem'
-      }}>
-        <div style={{ flex: '1 1 400px' }}>
-          <h2 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.02em' }}>🏆 Performance <span className="text-primary">Leaderboard</span></h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', lineHeight: 1.6 }}>Track the top 50 most profitable traders on Polymarket. See their active positions, volume, and total PnL in real-time.</p>
-        </div>
-        <Link href="/leaderboard" className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.1rem' }}>
-          View Full Leaderboard &rarr;
-        </Link>
-      </div>
+
 
 
       {/* News and Articles Section */}
@@ -347,8 +328,7 @@ export default async function Home() {
 
 
 
-      {/* Newsletter Subscription Section */}
-      <NewsletterSection />
+
     </main>
   );
 }

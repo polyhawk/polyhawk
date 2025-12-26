@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import WhaleAlertSettings from '@/components/WhaleAlertSettings';
 import styles from './whale-alerts.module.css';
 
 interface WhaleAlert {
@@ -33,8 +32,6 @@ export default function WhaleAlertsClient({ initialAlerts }: WhaleAlertsClientPr
 
     useEffect(() => {
         setIsClient(true);
-
-        // Load from localStorage
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
             try {
@@ -52,18 +49,11 @@ export default function WhaleAlertsClient({ initialAlerts }: WhaleAlertsClientPr
             if (!response.ok) return;
 
             const newAlerts: WhaleAlert[] = await response.json();
-
             if (!newAlerts || newAlerts.length === 0) return;
 
             setWhaleAlerts(prev => {
                 const existingIds = new Set(prev.map(a => a.id));
                 const uniqueNew = newAlerts.filter(a => !existingIds.has(a.id));
-
-                // Check for notification triggers
-                if (uniqueNew.length > 0) {
-                    checkAndSendNotifications(uniqueNew);
-                }
-
                 const combined = [...uniqueNew, ...prev]
                     .sort((a, b) => b.timestamp - a.timestamp)
                     .slice(0, 1000);
@@ -71,7 +61,6 @@ export default function WhaleAlertsClient({ initialAlerts }: WhaleAlertsClientPr
                 if (typeof window !== 'undefined') {
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(combined));
                 }
-
                 return combined;
             });
         } catch (error) {
@@ -79,71 +68,10 @@ export default function WhaleAlertsClient({ initialAlerts }: WhaleAlertsClientPr
         }
     };
 
-    const checkAndSendNotifications = async (alerts: WhaleAlert[]) => {
-        if (typeof window === 'undefined') return;
-
-        const prefsStr = localStorage.getItem('polyhawk_alert_preferences');
-        if (!prefsStr) return;
-
-        try {
-            const prefs = JSON.parse(prefsStr);
-            if (!prefs.enabled) return;
-
-            for (const alert of alerts) {
-                // Check if alert meets threshold
-                if (alert.amount < prefs.minTradeValue) continue;
-
-                // Send email notification
-                if (prefs.emailEnabled && prefs.email) {
-                    await fetch('/api/send-notification', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            channel: 'email',
-                            destination: prefs.email,
-                            alert: {
-                                amount: alert.amount,
-                                marketTitle: alert.marketTitle,
-                                side: alert.side,
-                                price: alert.price,
-                                marketUrl: alert.marketUrl,
-                                timestamp: alert.timestamp
-                            }
-                        })
-                    }).catch(console.error);
-                }
-
-                // Send Telegram notification
-                if (prefs.telegramEnabled && prefs.telegramChatId) {
-                    await fetch('/api/send-notification', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            channel: 'telegram',
-                            destination: prefs.telegramChatId,
-                            alert: {
-                                amount: alert.amount,
-                                marketTitle: alert.marketTitle,
-                                side: alert.side,
-                                price: alert.price,
-                                marketUrl: alert.marketUrl,
-                                timestamp: alert.timestamp
-                            }
-                        })
-                    }).catch(console.error);
-                }
-            }
-        } catch (error) {
-            console.error('Error sending notifications:', error);
-        }
-    };
-
     useEffect(() => {
-        // Fetch immediately on mount
         fetchWhaleAlerts();
-
-        // Then poll every 15 seconds
-        const interval = setInterval(fetchWhaleAlerts, 15000);
+        // Polling every 10 seconds for "constant updates" feel
+        const interval = setInterval(fetchWhaleAlerts, 10000);
         return () => clearInterval(interval);
     }, []);
 
@@ -176,8 +104,9 @@ export default function WhaleAlertsClient({ initialAlerts }: WhaleAlertsClientPr
 
     return (
         <div>
-            {/* Alert Settings */}
-            <WhaleAlertSettings />
+            {/* Subscription Widget Removed as per user request */}
+
+            {/* Whale Alerts Grid */}
 
             {/* Whale Alerts Grid */}
             <div className={styles.alertsGrid}>
@@ -207,7 +136,12 @@ export default function WhaleAlertsClient({ initialAlerts }: WhaleAlertsClientPr
                                 <div style={{ flex: 1, minWidth: '300px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
                                         {alert.icon ? (
-                                            <img src={alert.icon} alt="" className={styles.marketIcon} />
+                                            <img
+                                                src={alert.icon}
+                                                alt={alert.marketTitle}
+                                                className={styles.marketIcon}
+                                                style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.1)' }}
+                                            />
                                         ) : (
                                             <span className={styles.whaleEmoji}>{getWhaleEmoji(alert.amount)}</span>
                                         )}

@@ -76,8 +76,8 @@ export async function fetchNews(): Promise<NewsItem[]> {
     try {
         const news: NewsItem[] = [];
 
-        // 1. Fetch from NewsAPI.org (Premium Source) - Targeting specific domains including Forbes & Arkham related
-        if (apiKey) {
+        // 1. Fetch from NewsAPI.org (Premium Source) - DISABLED per user request
+        if (false && apiKey) {
             try {
                 // Added domains and keywords for broader coverage including Arkham
                 const newsApiUrl = `https://newsapi.org/v2/everything?q=(polymarket OR "prediction market" OR "Arkham Intelligence" OR "crypto betting")&domains=coindesk.com,theblock.co,cointelegraph.com,forbes.com,bloomberg.com&sortBy=publishedAt&pageSize=20&apiKey=${apiKey}`;
@@ -115,7 +115,9 @@ export async function fetchNews(): Promise<NewsItem[]> {
         const rssFeeds = [
             { source: 'CoinDesk', url: 'https://www.coindesk.com/arc/outboundfeeds/rss/?outputType=xml' },
             { source: 'The Block', url: 'https://www.theblock.co/rss.xml' },
-            { source: 'Cointelegraph', url: 'https://cointelegraph.com/rss' }
+            { source: 'Cointelegraph', url: 'https://cointelegraph.com/rss' },
+            { source: 'Decrypt', url: 'https://decrypt.co/feed' },
+            { source: 'CryptoSlate', url: 'https://cryptoslate.com/feed/' }
         ];
 
         for (const feed of rssFeeds) {
@@ -221,7 +223,16 @@ export async function fetchNews(): Promise<NewsItem[]> {
         return uniqueNews.sort((a, b) => {
             if (a.time === 'Live') return -1;
             if (b.time === 'Live') return 1;
-            return 0.5 - Math.random();
+
+            // Convert time strings back to roughly comparable values for sorting
+            const getMinutes = (t: string) => {
+                if (t === 'Just now') return 0;
+                if (t.includes('h ago')) return parseInt(t) * 60;
+                if (t.includes('d ago')) return parseInt(t) * 1440;
+                return 9999;
+            };
+
+            return getMinutes(a.time) - getMinutes(b.time);
         });
     } catch (error) {
         console.error('FetchNews Error', error);
@@ -640,9 +651,9 @@ export async function fetchWhaleAlertsV2(): Promise<WhaleAlert[]> {
         // This is crucial because data-api trades only give us condition_id/market_id
         let events = [];
         try {
-            const eventsResponse = await fetch('https://gamma-api.polymarket.com/events?limit=500&active=true&closed=false&order=volume24hr&ascending=false', {
+            const eventsResponse = await fetch('https://gamma-api.polymarket.com/events?limit=1000&active=true&closed=false&order=volume24hr&ascending=false', {
                 cache: 'force-cache',
-                next: { revalidate: 300 } // Cache events for 5 mins
+                next: { revalidate: 60 } // Cache events for 1 min (improved from 5)
             });
             if (eventsResponse.ok) {
                 events = await eventsResponse.json();
@@ -670,6 +681,13 @@ export async function fetchWhaleAlertsV2(): Promise<WhaleAlert[]> {
                         if (market.condition_id) conditionToEvent.set(market.condition_id, eventData);
                         if (market.id) conditionToEvent.set(market.id, eventData);
                         if (market.asset_id) conditionToEvent.set(market.asset_id, eventData);
+                        // Also map the asset ID itself if possible (sometimes conditionId != asset_id but commonly used)
+                        if (market.clobTokenIds && Array.isArray(JSON.parse(market.clobTokenIds))) {
+                            try {
+                                const tokens = JSON.parse(market.clobTokenIds);
+                                tokens.forEach((t: string) => conditionToEvent.set(t, eventData));
+                            } catch (e) { }
+                        }
                     }
                 }
             }
@@ -677,35 +695,52 @@ export async function fetchWhaleAlertsV2(): Promise<WhaleAlert[]> {
 
         // Fetch trades in multiple batches to get a longer history
         let trades: any[] = [];
-        const BATCH_COUNT = 3;
+        const BATCH_COUNT = 5;
         let lastTimestamp = 0;
 
         for (let b = 0; b < BATCH_COUNT; b++) {
             try {
-                let url = `https://data-api.polymarket.com/trades?limit=1000&sortBy=TIMESTAMP&sortDirection=DESC`;
-                if (lastTimestamp > 0) {
-                    // Using timestampLT if supported, or just offset if not. 
-                    // Data API usually supports TIMESTAMP sorting with cursors.
-                    // For now, we'll try to see if we can get older ones by limit=1000.
-                    // Actually, let's just use limit 1000 for one big fetch first.
-                    // If we want more, we need the cursor from the previous response.
-                    // But if it's not provided, we might be stuck.
+                // Use CLOB Client for authenticated access (higher limits, uses USER provided keys)
+                if (process.env.POLYMARKET_API_KEY && process.env.POLYMARKET_API_SECRET) {
+                    const params = new URLSearchParams({
+                        limit: '1000',
+                        taker_only: 'true'
+                    });
+                    if (lastTimestamp > 0) params.append('before', lastTimestamp.toString());
+
+                    const clobData = await polymarketClient.request({
+                        method: 'GET',
+                        path: `/data/trades?${params.toString()}`,
+                        isPublic: false
+                    }) as any[];
+
+                    if (Array.isArray(clobData)) {
+                        trades.push(...clobData);
+                        if (clobData.length > 0) {
+                            const last = clobData[clobData.length - 1];
+                            lastTimestamp = last.timestamp || 0;
+                        } else {
+                            break;
+                        }
+                        continue;
+                    }
                 }
 
-                // Let's stick to 1000 for now but ensure we filter correctly.
-                // Wait, if 1000 is only 2 minutes, we NEED more.
-                // I'll try to use the 'cursor' or 'timestamp' from the last trade.
+                // FALLBACK: Raw Data API (Public)
+                let url = `https://data-api.polymarket.com/trades?limit=1000&sortBy=TIMESTAMP&sortDirection=DESC`;
                 const response = await fetch(url + (lastTimestamp > 0 ? `&timestampLT=${lastTimestamp}` : ''), {
                     cache: 'no-store',
-                    next: { revalidate: 60 }
+                    next: { revalidate: 0 }
                 });
 
-                if (response.ok) {
-                    const batch = await response.json();
-                    if (Array.isArray(batch) && batch.length > 0) {
-                        trades = [...trades, ...batch];
-                        const lastTrade = batch[batch.length - 1];
-                        lastTimestamp = lastTrade.timestamp;
+                if (!response.ok) break;
+                const data = await response.json();
+
+                if (Array.isArray(data)) {
+                    trades.push(...data);
+                    if (data.length > 0) {
+                        const last = data[data.length - 1];
+                        lastTimestamp = last.timestamp || 0;
                     } else {
                         break;
                     }
@@ -713,17 +748,13 @@ export async function fetchWhaleAlertsV2(): Promise<WhaleAlert[]> {
                     break;
                 }
             } catch (err) {
-                console.error('Data API fetch failed:', err);
+                console.error('Batch fetch error:', err);
                 break;
             }
         }
 
-        if (!Array.isArray(trades) || trades.length === 0) {
-            return [];
-        }
-
         const whaleAlerts: WhaleAlert[] = [];
-        const MIN_WHALE_VALUE = 2000; // Lowered from 5000 to show more activity
+        const MIN_WHALE_VALUE = 5000;
         const seenTrades = new Set<string>();
 
         for (const trade of trades) {
@@ -731,15 +762,7 @@ export async function fetchWhaleAlertsV2(): Promise<WhaleAlert[]> {
             const amount = parseFloat(trade.amount || '0');
             const price = parseFloat(trade.price || '0.5');
 
-            // Robust USD value calculation: 
-            // 1. If size is present, it's usually shares. Value = size * price.
-            // 2. If size is missing but amount is present, amount is often the USD value in newer APIs.
-            let tradeValue = 0;
-            if (size > 0) {
-                tradeValue = size * price;
-            } else {
-                tradeValue = amount;
-            }
+            let tradeValue = size > 0 ? size * price : amount;
 
             if (tradeValue >= MIN_WHALE_VALUE) {
                 const tradeId = `${trade.transactionHash || trade.id}-${trade.timestamp}`;
@@ -747,12 +770,48 @@ export async function fetchWhaleAlertsV2(): Promise<WhaleAlert[]> {
                 seenTrades.add(tradeId);
 
                 const conditionId = trade.conditionId || trade.asset || 'unknown';
-                const eventInfo = conditionToEvent.get(conditionId);
+                let eventInfo = conditionToEvent.get(conditionId);
 
-                // Skip trades without valid event mapping to prevent broken links
-                if (!eventInfo || !eventInfo.slug) {
-                    continue;
+                if (!eventInfo && trade.title) {
+                    eventInfo = {
+                        title: trade.title,
+                        slug: trade.slug || trade.eventSlug,
+                        icon: trade.icon,
+                        category: 'Market'
+                    };
                 }
+
+                // Fallback: If event info is missing, try to fetch it on-the-fly
+                // This handles cases where a new market appears that wasn't in our events cache
+                if (!eventInfo) {
+                    try {
+                        // Attempt to fetch market by condition ID
+                        const marketRes = await fetch(`https://gamma-api.polymarket.com/markets?condition_id=${conditionId}`);
+                        if (marketRes.ok) {
+                            const marketsData = await marketRes.json();
+                            if (Array.isArray(marketsData) && marketsData.length > 0) {
+                                const m = marketsData[0];
+                                // We need the parent event usually, but market data might suffice
+                                // Or fetch event by market id
+                                if (m.events && m.events.length > 0) {
+                                    const e = m.events[0];
+                                    eventInfo = {
+                                        title: e.title,
+                                        slug: e.slug,
+                                        icon: e.icon || e.image,
+                                        category: e.category || 'Market'
+                                    };
+                                    // Cache it for this execution
+                                    conditionToEvent.set(conditionId, eventInfo);
+                                }
+                            }
+                        }
+                    } catch (err) {
+                        // console.error('Fallback fetch failed', err);
+                    }
+                }
+
+                if (!eventInfo || !eventInfo.slug) continue;
 
                 whaleAlerts.push({
                     id: tradeId,
@@ -771,16 +830,13 @@ export async function fetchWhaleAlertsV2(): Promise<WhaleAlert[]> {
                     debug: false
                 });
 
-                if (whaleAlerts.length >= 100) break; // Increased to 100
+                if (whaleAlerts.length >= 100) break;
             }
         }
 
-
-        // Sort by timestamp
         whaleAlerts.sort((a, b) => b.timestamp - a.timestamp);
 
         if (whaleAlerts.length === 0) {
-            // Mock data fallback if absolutely nothing found (unlikely)
             return [
                 {
                     id: 'mock-1',
@@ -875,7 +931,24 @@ export async function fetchUserPositions(address: string): Promise<any[]> {
     }
 
     try {
-        // Use Data API for positions - more reliable for public enrichment
+        // 1. Try Builder API (CLOB) if keys are present
+        if (process.env.POLYMARKET_API_KEY && process.env.POLYMARKET_API_SECRET) {
+            try {
+                console.log(`Using Builder API for portfolio tracking: ${address}`);
+                const positions = await polymarketClient.getPositions(address);
+
+                if (Array.isArray(positions)) {
+                    // Normalize CLOB data to match expected Data API format if needed
+                    // Component already handles common aliases like pos.asset_id/pos.id
+                    positionsCache[address] = { data: positions, timestamp: now };
+                    return positions;
+                }
+            } catch (clobErr) {
+                console.error('Builder API Positions failed, falling back to Data API:', clobErr);
+            }
+        }
+
+        // 2. FALLBACK: Use Data API for positions
         const response = await fetch(`https://data-api.polymarket.com/positions?user=${address}&sortBy=CURRENT&sizeThreshold=.01&limit=500`, {
             next: { revalidate: 300 }
         });
