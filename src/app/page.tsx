@@ -6,7 +6,7 @@ import WhaleAlertsWidget from '@/components/WhaleAlertsWidget';
 
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 30; // Cache for 30 seconds
 
 // Mock Featured Articles (Subset of Learn)
 const FEATURED_ARTICLES = [
@@ -20,14 +20,20 @@ const FEATURED_ARTICLES = [
 ];
 
 export default async function Home() {
-  const [polymarketData, sportsMarketsData, politicsMarketsData, cryptoMarketsData, newMarketsData, whaleAlertsData] = await Promise.all([
-    fetchPolymarketTrending(),
-    fetchMarketsByCategory('sports'),
-    fetchMarketsByCategory('politics'),
-    fetchMarketsByCategory('crypto'),
-    fetchNewMarkets(),
-    fetchWhaleAlerts()
-  ]);
+  let polymarketData: any[] = [], sportsMarketsData: any[] = [], politicsMarketsData: any[] = [], cryptoMarketsData: any[] = [], newMarketsData: any[] = [], whaleAlertsData: any[] = [];
+
+  try {
+    [polymarketData, sportsMarketsData, politicsMarketsData, cryptoMarketsData, newMarketsData, whaleAlertsData] = await Promise.all([
+      fetchPolymarketTrending().catch(() => []),
+      fetchMarketsByCategory('sports').catch(() => []),
+      fetchMarketsByCategory('politics').catch(() => []),
+      fetchMarketsByCategory('crypto').catch(() => []),
+      fetchNewMarkets().catch(() => []),
+      fetchWhaleAlerts().catch(() => [])
+    ]);
+  } catch (error) {
+    console.error("Error fetching homepage data:", error);
+  }
 
   // Aggregate all markets for general stats
   const allMarkets = [...polymarketData].sort((a, b) => b.volume - a.volume);
