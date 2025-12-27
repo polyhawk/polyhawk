@@ -114,29 +114,35 @@ export async function fetchNews(): Promise<NewsItem[]> {
         console.error('CryptoPanic Error:', error);
     }
 
-    // 2. Fetch Polymarket "New" events acting as news (limited)
+    // 2. Fetch Polymarket Events (High Volume & Newest) as News
     try {
-        const polyResponse = await fetch('https://gamma-api.polymarket.com/events?limit=3&active=true&closed=false&order=volume24hr&ascending=false', { next: { revalidate: 60 } });
-        const polyData = await polyResponse.json();
+        // Fetch Top Volume
+        const volResponse = await fetch('https://gamma-api.polymarket.com/events?limit=10&active=true&closed=false&order=volume24hr&ascending=false', { next: { revalidate: 60 } });
+        const volData = await volResponse.json();
 
-        polyData.forEach((event: any) => {
+        // Fetch Newest
+        const newResponse = await fetch('https://gamma-api.polymarket.com/events?limit=10&active=true&closed=false&order=startDate&ascending=false', { next: { revalidate: 60 } });
+        const newData = await newResponse.json();
+
+        const allPoly = [...volData, ...newData];
+
+        allPoly.forEach((event: any) => {
             news.push({
                 id: `poly-news-${event.id}`,
-                title: `Live Market: ${event.title}`,
+                title: `Market Update: ${event.title}`,
                 source: 'Polymarket',
                 time: 'Live',
-                category: 'Signal',
+                category: event.new ? 'New Market' : 'Trending',
                 url: getPolymarketUrl(`event/${event.slug}`),
-                snippet: `High activity market: ${event.tags?.[0]?.label || 'Prediction'}.`,
+                snippet: `Market active. Volume: $${Math.floor(Number(event.volume24hr || 0)).toLocaleString()}. Liquidity: $${Math.floor(Number(event.liquidity || 0)).toLocaleString()}.`,
                 sentiment: 'Neutral',
                 imageUrl: event.image || 'https://images.unsplash.com/photo-1611974765270-ca1258634369?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
             });
         });
-    } catch (e) { /* ignore */ }
+    } catch (e) { console.error('Poly News Error', e); }
 
-    if (news.length === 0) return getFallbackNews();
-
-    return news;
+    // Deduplicate by title
+    const uniqueNews = Array.from(new Map(news.map(item => [item.title, item])).values());
 }
 
 function getFallbackNews(): NewsItem[] {
