@@ -160,40 +160,7 @@ export default async function Home() {
       {/* News and Articles Section */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '3rem' }}>
 
-        {/* Latest News */}
-        <div style={{ flex: 2 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Latest News</h2>
-            <Link href="/news" className="text-primary" style={{ fontWeight: 600 }}>See all &rarr;</Link>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {news.slice(0, 4).map(item => (
-              <a href={item.url} target="_blank" key={item.id} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div className="card-hover" style={{
-                  background: 'var(--surface)',
-                  border: '1px solid var(--border)',
-                  borderRadius: '16px',
-                  padding: '1rem',
-                  display: 'flex',
-                  gap: '1rem',
-                  alignItems: 'center'
-                }}>
-                  <div style={{ width: '80px', height: '80px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0 }}>
-                    <img src={item.imageUrl} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </div>
-                  <div>
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '4px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                      <span style={{ fontWeight: 600, color: 'var(--primary)' }}>{item.source}</span>
-                      <span>•</span>
-                      <span>{item.time}</span>
-                    </div>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 700, lineHeight: 1.4, marginBottom: '4px' }}>{item.title}</h3>
-                  </div>
-                </div>
-              </a>
-            ))}
-          </div>
-        </div>
+
 
         {/* Featured Articles */}
         <div style={{ flex: 1 }}>
