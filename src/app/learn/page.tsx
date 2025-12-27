@@ -91,8 +91,8 @@ export default function LearnPage() {
             <div style={{ margin: '4rem 0 3rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <h1 style={{ fontSize: '3rem', fontWeight: 800 }}>Learn</h1>
             </div>
-            <p className="text-secondary" style={{ fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>
-
+            <p className="text-secondary" style={{ fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto 2rem', textAlign: 'center' }}>
+                <strong>Disclaimer:</strong> The information provided in these articles is for educational purposes only and may or may not be accurate. Please conduct your own research before making any trading decisions.
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
