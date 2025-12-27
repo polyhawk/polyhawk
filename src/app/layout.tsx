@@ -68,28 +68,7 @@ export default function RootLayout({
             <div style={{ display: 'grid', gap: '2rem', marginBottom: '2rem' }}>
               <div>
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1rem' }}>POLY<span className="text-primary">HAWK</span></h3>
-                <p className="text-secondary" style={{ maxWidth: '400px', lineHeight: 1.6, marginBottom: '1.5rem' }}>
-                  Advanced prediction market insights for smarter trading
-                </p>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                  <a href="https://x.com/PolyHawk0" target="_blank" rel="noopener noreferrer" style={{
-                    color: 'white',
-                    background: 'rgba(255,255,255,0.05)',
-                    padding: '0.6rem 1rem',
-                    borderRadius: '12px',
-                    textDecoration: 'none',
-                    fontSize: '0.9rem',
-                    fontWeight: 700,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    transition: 'all 0.2s',
-                    border: '1px solid var(--border)'
-                  }} className="social-link">
-                    <span style={{ fontSize: '1.2rem' }}>𝕏</span>
-                    Follow @PolyHawk0
-                  </a>
-                </div>
+
               </div>
             </div>
             <div style={{
