@@ -34,7 +34,7 @@ export default function Navbar() {
 
                         <Link href="/whale-alerts" className={`nav-link-v2 ${pathname === '/whale-alerts' ? 'active' : ''}`} onClick={closeMenu}>Whale Alerts</Link>
                         <Link href="/wallet-checker" className={`nav-link-v2 ${pathname === '/wallet-checker' ? 'active' : ''}`} onClick={closeMenu}>Whales</Link>
-                        <Link href="/news" className={`nav-link-v2 ${pathname === '/news' ? 'active' : ''}`} onClick={closeMenu}>News</Link>
+
                         <Link href="/learn" className={`nav-link-v2 ${pathname === '/learn' ? 'active' : ''}`} onClick={closeMenu}>Learn</Link>
                         <Link href="/portfolio" className={`nav-link-v2 ${pathname === '/portfolio' ? 'active' : ''}`} onClick={closeMenu}>Portfolio</Link>
                     </div>
