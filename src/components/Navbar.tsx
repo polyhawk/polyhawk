@@ -32,8 +32,7 @@ export default function Navbar() {
                 <div className={`nav-links-container ${isMenuOpen ? 'open' : ''}`}>
                     <div className="nav-links">
 
-                        <Link href="/whale-alerts" className={`nav-link-v2 ${pathname === '/whale-alerts' ? 'active' : ''}`} onClick={closeMenu}>Whale Alerts</Link>
-                        <Link href="/wallet-checker" className={`nav-link-v2 ${pathname === '/wallet-checker' ? 'active' : ''}`} onClick={closeMenu}>Whales</Link>
+
 
                         <Link href="/learn" className={`nav-link-v2 ${pathname === '/learn' ? 'active' : ''}`} onClick={closeMenu}>Learn</Link>
                         <Link href="/portfolio" className={`nav-link-v2 ${pathname === '/portfolio' ? 'active' : ''}`} onClick={closeMenu}>Portfolio</Link>

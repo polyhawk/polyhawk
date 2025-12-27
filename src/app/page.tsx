@@ -20,16 +20,15 @@ const FEATURED_ARTICLES = [
 ];
 
 export default async function Home() {
-  let polymarketData: any[] = [], sportsMarketsData: any[] = [], politicsMarketsData: any[] = [], cryptoMarketsData: any[] = [], newMarketsData: any[] = [], whaleAlertsData: any[] = [];
+  let polymarketData: any[] = [], sportsMarketsData: any[] = [], politicsMarketsData: any[] = [], cryptoMarketsData: any[] = [], newMarketsData: any[] = [];
 
   try {
-    [polymarketData, sportsMarketsData, politicsMarketsData, cryptoMarketsData, newMarketsData, whaleAlertsData] = await Promise.all([
+    [polymarketData, sportsMarketsData, politicsMarketsData, cryptoMarketsData, newMarketsData] = await Promise.all([
       fetchPolymarketTrending().catch(() => []),
       fetchMarketsByCategory('sports').catch(() => []),
       fetchMarketsByCategory('politics').catch(() => []),
       fetchMarketsByCategory('crypto').catch(() => []),
-      fetchNewMarkets().catch(() => []),
-      fetchWhaleAlerts().catch(() => [])
+      fetchNewMarkets().catch(() => [])
     ]);
   } catch (error) {
     console.error("Error fetching homepage data:", error);
