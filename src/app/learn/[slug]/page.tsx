@@ -635,6 +635,12 @@ const ARTICLE_CONTENT: Record<string, { title: string; date: string; readTime: s
     }
 };
 
+export function generateStaticParams() {
+    return Object.keys(ARTICLE_CONTENT).map((slug) => ({
+        slug: slug,
+    }));
+}
+
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
 
