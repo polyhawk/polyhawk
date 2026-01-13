@@ -27,10 +27,12 @@ export default function WhaleAlertsWidget({ initialAlerts }: WhaleAlertsWidgetPr
     }, []);
 
     // 2. Poll for new alerts every 15 seconds from Polymarket
+    // 2. Poll for new alerts every 60 seconds (reads static file)
     useEffect(() => {
         const poll = async () => {
             try {
-                const response = await fetch('/api/whale-alerts', { cache: 'no-store' });
+                // Fetch from static JSON generated at build time
+                const response = await fetch('/data/whale-alerts.json', { cache: 'no-store' });
                 if (!response.ok) return;
                 const newAlerts: WhaleAlert[] = await response.json();
 
@@ -55,7 +57,8 @@ export default function WhaleAlertsWidget({ initialAlerts }: WhaleAlertsWidgetPr
         // Poll immediately on mount
         poll();
 
-        const interval = setInterval(poll, 15000);
+        // Optional: Keep polling in case file changes (unlikely in pure static export without rebuild)
+        const interval = setInterval(poll, 60000);
         return () => clearInterval(interval);
     }, []);
 

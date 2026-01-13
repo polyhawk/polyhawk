@@ -5,8 +5,8 @@ import HomeMarketTable from '@/components/HomeMarketTable';
 import WhaleAlertsWidget from '@/components/WhaleAlertsWidget';
 
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 30; // Cache for 30 seconds
+// export const dynamic = 'force-dynamic';
+// export const revalidate = 30; // Cache for 30 seconds
 
 // Mock Featured Articles (Subset of Learn)
 const FEATURED_ARTICLES = [
